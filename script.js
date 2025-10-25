@@ -68,8 +68,6 @@ function initContactForm() {
     if (contactForm) {
         // Event listener para el envío del formulario
         contactForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevenir envío por defecto del formulario
-            
             // Obtener datos del formulario
             const formData = new FormData(contactForm);
             const nombre = formData.get('nombre');
@@ -78,6 +76,7 @@ function initContactForm() {
             
             // Validar que todos los campos estén completos
             if (!nombre || !correo || !mensaje) {
+                e.preventDefault();
                 showNotification('Por favor, completa todos los campos', 'error');
                 return;
             }
@@ -85,46 +84,29 @@ function initContactForm() {
             // Validar formato de email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(correo)) {
+                e.preventDefault();
                 showNotification('Por favor, ingresa un email válido', 'error');
                 return;
             }
             
-            // Simular envío del formulario
-            simulateFormSubmission(nombre, correo, mensaje);
+            // Mostrar estado de carga
+            const submitButton = document.querySelector('#contactForm button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Enviando...';
+            submitButton.disabled = true;
+            
+            // El formulario se enviará automáticamente a Formspree
+            // Mostrar mensaje de éxito después de un breve delay
+            setTimeout(() => {
+                showNotification('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success');
+                contactForm.reset();
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }, 1000);
         });
     }
 }
 
-// Función para simular el envío del formulario
-function simulateFormSubmission(nombre, correo, mensaje) {
-    // Mostrar estado de carga
-    const submitButton = document.querySelector('#contactForm button[type="submit"]');
-    const originalText = submitButton.textContent;
-    submitButton.textContent = 'Enviando...';
-    submitButton.disabled = true;
-    
-    // Simular delay de envío
-    setTimeout(() => {
-        // Mostrar mensaje de éxito en consola
-        console.log('Formulario enviado correctamente');
-        console.log('Datos del formulario:', {
-            nombre: nombre,
-            correo: correo,
-            mensaje: mensaje
-        });
-        
-        // Mostrar notificación de éxito
-        showNotification('¡Mensaje enviado correctamente! Te contactaremos pronto.', 'success');
-        
-        // Limpiar formulario
-        document.getElementById('contactForm').reset();
-        
-        // Restaurar botón
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-        
-    }, 2000); // 2 segundos de delay para simular envío
-}
 
 // Función para mostrar notificaciones
 function showNotification(message, type) {
